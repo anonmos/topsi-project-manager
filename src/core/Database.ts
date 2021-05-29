@@ -12,19 +12,25 @@ export class DBUtils {
   private content: any;
 
   constructor(private readonly name: string, defaultPath: string | null = null) {
-    // Paths
-    const dir =
-      process.platform == "darwin" ? path.join(os.homedir(), ".topsi") : path.resolve(".");
-
+    console.log(`Path directory: ${__dirname}`)
     this.dataPath =
-      defaultPath == null || defaultPath.length <= 0 ? path.join(dir, "data/") : defaultPath;
+      defaultPath == null || defaultPath.length <= 0 ? path.join(__dirname, "data/") : defaultPath;
     this.dbFilePath = path.join(this.dataPath, this.name);
 
     // Make sure the 'data' folder exists
     if (!fs.existsSync(this.dataPath)) {
-      throw new Error("Path not found");
-      // if (process.platform == "darwin" && !fs.existsSync(dir)) fs.mkdirSync(dir);
-      // fs.mkdirSync(this.dataPath);
+      const resourcesPathSplit = __dirname.split('/')
+      const resourcesPathIndex = resourcesPathSplit.findIndex((value) => value.indexOf('.asar') > -1)
+      let resourcesPath = '.'
+      if (resourcesPathIndex > -1) {
+        resourcesPath = resourcesPathSplit.slice(0, resourcesPathIndex).join('/')
+      }
+    
+      console.log(`Resources Path: ${resourcesPath}`)
+      fs.mkdirSync(path.join(resourcesPath, 'data'), {
+        recursive: true,
+      });
+      this.dbFilePath = path.join(resourcesPath, this.name)
     }
     this.context = new DBFile(this.dbFilePath);
 
